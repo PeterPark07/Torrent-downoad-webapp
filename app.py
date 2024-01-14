@@ -53,7 +53,13 @@ def index():
 
         if download_response and download_response.get('success'):
             download_links = download_response.get('download_links', [])
-            return render_template('index.html', download_links=download_links)
+            file_names = download_response.get('file_names', [])
+            file_sizes = download_response.get('file_sizes', [])
+
+            # Zip the lists before passing them to the template
+            file_data = zip(download_links, file_names, file_sizes)
+            
+            return render_template('index.html', file_data=file_data)
         else:
             error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
             return render_template('index.html', error_message=error_message)
