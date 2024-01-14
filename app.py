@@ -13,10 +13,11 @@ def download_torrent_from_api(magnet):
     torrents = account.listContents()['torrents']
     print(torrents)
     while torrents:
-        time.sleep(10)
+        time.sleep(3)
         torrents = account.listContents()['torrents']
     folders = account.listContents()['folders']
     print(folders)
+    print(account.listContents())
 
     if folders:
         for folder in folders:
