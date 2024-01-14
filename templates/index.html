@@ -85,8 +85,11 @@
     {% if download_links %}
         <h2>Download Links:</h2>
         <ul>
-            {% for link in download_links %}
-                <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+            {% for link, name, size in zip(download_links, file_names, file_sizes) %}
+                <li>
+                    <a href="{{ link }}" target="_blank">{{ name }}</a>
+                    (Size: {{ size }})
+                </li>
             {% endfor %}
         </ul>
     {% endif %}
