@@ -33,13 +33,13 @@ def download_torrent_from_api(magnet):
     files = account.listContents(folderId=folder_id)['files']
     names = []
     links =[]
+    sizes =[]
     for file in files:
         names.append(file['name'])
-    for file in files:
-        id = file['folder_file_id']
-        links.append(account.fetchFile(fileId=id))
+        links.append(account.fetchFile(fileId=file['folder_file_id']))
+        sizes,append(file['size'])
 
-    return {'success': True, 'download_links': links}
+    return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes}
 
 
     # {'success': False, 'error_message': 'Torrent download failed.'}
