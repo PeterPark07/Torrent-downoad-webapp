@@ -3,7 +3,7 @@ from helper.account import account
 
 app = Flask(__name__)
 
-def download_torrent_from_api(magnet_link):
+def download_torrent_from_api(magnet):
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
         response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
