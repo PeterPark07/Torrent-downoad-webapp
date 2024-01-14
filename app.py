@@ -8,6 +8,8 @@ def download_torrent_from_api(magnet):
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
         response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
+    else:
+        return {'success': False, 'error_message': 'invalid link.'}
     torrents = account.listContents()['torrents']
     print(torrents)
     while torrents:
@@ -20,12 +22,14 @@ def download_torrent_from_api(magnet):
         for folder in folders:
             folder_id = folder['id']
             print(folder_id)
-    files = account.listContents(folderId=folder_id)
-    print(files)
-    # and handle the response. Return a dictionary with relevant information.
-    # Example response:
-    # {'success': True, 'download_links': ['/download/file1', '/download/file2']}
-    # or
+    files = account.listContents(folderId=folder_id)['files']
+    names = []
+    for file in files:
+        names.append(file['name'])
+
+    return {'success': True, 'download_links': names}
+
+
     # {'success': False, 'error_message': 'Torrent download failed.'}
     pass
 
