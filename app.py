@@ -37,7 +37,7 @@ def download_torrent_from_api(magnet):
     for file in files:
         names.append(file['name'])
         links.append(account.fetchFile(fileId=file['folder_file_id']))
-        sizes,append(file['size'])
+        sizes.append(str((file['size'])//(1024*1024)) + ' MB')
 
     return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes}
 
