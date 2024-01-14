@@ -10,7 +10,7 @@ def download_torrent_from_api(magnet):
     if folders:
         for folder in folders:
             folder_id = folder['id']
-            del = = account.deleteFolder(folderId=folder_id)
+            del = account.deleteFolder(folderId=folder_id)
 
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
