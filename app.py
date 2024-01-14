@@ -1,10 +1,26 @@
 from flask import Flask, render_template, request
+from helper.account import account
 
 app = Flask(__name__)
 
-# Replace this with the actual logic to handle torrent download from your third-party API
 def download_torrent_from_api(magnet_link):
-    # Implement logic to make a request to your third-party API
+    add = account.addTorrent(magnetLink=magnet)
+    if add['result'] == True:
+        response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
+    torrents = account.listContents()['torrents']
+    print(torrents)
+    while torrents:
+        time.sleep(10)
+        torrents = account.listContents()['torrents']
+    folders = account.listContents()['folders']
+    print(folders)
+
+    if folders:
+        for folder in folders:
+            folder_id = folder['id']
+            print(folder_id)
+    files = account.listContents(folderId=folder_id)
+    print(files)
     # and handle the response. Return a dictionary with relevant information.
     # Example response:
     # {'success': True, 'download_links': ['/download/file1', '/download/file2']}
