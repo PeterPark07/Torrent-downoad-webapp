@@ -5,6 +5,13 @@ import time
 app = Flask(__name__)
 
 def download_torrent_from_api(magnet):
+
+    folders = account.listContents()['folders']
+    if folders:
+        for folder in folders:
+            folder_id = folder['id']
+            del = = account.deleteFolder(folderId=folder_id)
+
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
         response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
