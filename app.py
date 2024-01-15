@@ -16,9 +16,17 @@ def download_torrent_from_api(magnet):
     torrents = account.listContents()['torrents']
     title = torrents[0]['name']
     print(torrents)
+
+    start_time = time.time()
+
     while torrents:
         time.sleep(3)
+        progress = torrents[0]['progress']
         torrents = account.listContents()['torrents']
+        
+        if time.time() - start_time > 30 and progress < 5:
+            return {'success': False, 'error_message': 'Torrent is too slow to download.'}
+        
     folders = account.listContents()['folders']
     print(account.listContents())
     
