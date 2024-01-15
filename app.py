@@ -9,6 +9,7 @@ def download_torrent_from_api(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
+    print(add)
     if add['result'] == True:
         response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
     else:
@@ -24,7 +25,10 @@ def download_torrent_from_api(magnet):
     if folders:
         for folder in folders:
             folder_id = folder['id']
-    files = account.listContents(folderId=folder_id)['files']
+    if folder_id:
+        files = account.listContents(folderId=folder_id)['files']
+    else:
+        files = account.listContents()['files']
     names = []
     links =[]
     sizes =[]
