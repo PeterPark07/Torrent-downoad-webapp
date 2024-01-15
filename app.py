@@ -12,7 +12,7 @@ def download_torrent(magnet):
 
     if add['result'] != True:
         if add['result'] == 'not_enough_space_wishlist_full':
-            return {'success': False, 'error_message': 'Max torrent size is 4GB.'}
+            return {'success': False, 'error_message': 'Maximum torrent size is 4GB.'}
         error_message = ' - ' + add['error'] if 'error' in add else ''
         return {'success': False, 'error_message': add['result'] + error_message}
 
