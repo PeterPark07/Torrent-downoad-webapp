@@ -16,6 +16,7 @@ def download_torrent_from_api(magnet):
         return {'success': False, 'error_message': 'invalid link.'}
 
     torrents = account.listContents()['torrents']
+    print(torrents)
     while torrents:
         time.sleep(3)
         torrents = account.listContents()['torrents']
