@@ -1,23 +1,8 @@
 from flask import Flask, render_template, request
-from helper.account import account
+from helper.account import account, clean
 import time 
 
 app = Flask(__name__)
-
-
-def clean():
-    
-    storage = account.listContents()
-
-    for item_type in ['folders', 'files', 'torrents']:
-        for item in storage.get(item_type, []):
-            if item_type == 'folders':
-                account.deleteFolder(item['id'])
-            elif item_type == 'files':
-                account.deleteFile(item['id'])
-            else:
-                account.deleteTorrent(item['id'])
-
 
 def download_torrent_from_api(magnet):
 
