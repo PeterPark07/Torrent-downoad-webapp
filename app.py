@@ -9,7 +9,6 @@ def download_torrent_from_api(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
-    print(add)
 
     if add['result'] != True:
         error_message = ' - ' + add['error'] if 'error' in add else ''
@@ -17,17 +16,19 @@ def download_torrent_from_api(magnet):
 
     torrents = account.listContents()['torrents']
     title = torrents[0]['name']
-    print(torrents)
 
     start_time = time.time()
 
     while torrents:
         time.sleep(3)
         progress = float(torrents[0]['progress'])
-        print(progress)
         torrents = account.listContents()['torrents']
         
         if time.time() - start_time > 45 and progress < 5:
+            clean()
+            return {'success': False, 'error_message': 'Torrent is too slow to download.'}
+
+        if time.time() - start_time > 300 and progress < 95:
             clean()
             return {'success': False, 'error_message': 'Torrent is too slow to download.'}
         
