@@ -4,8 +4,9 @@ import time
 
 app = Flask(__name__)
 
-def download_torrent_from_api(magnet):
 
+def clean():
+    
     storage = account.listContents()
 
     for item_type in ['folders', 'files', 'torrents']:
@@ -17,6 +18,10 @@ def download_torrent_from_api(magnet):
             else:
                 account.deleteTorrent(item['id'])
 
+
+def download_torrent_from_api(magnet):
+
+    clean()
 
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
