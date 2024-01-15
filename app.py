@@ -4,6 +4,15 @@ import time
 
 app = Flask(__name__)
 
+def progress_check(start_time, progress):
+    if time.time() - start_time > 45 and progress < 5:
+        return False
+    elif time.time() - start_time > 300 and progress < 95:
+        return False
+    else:
+        return True
+
+
 def download_torrent_from_api(magnet):
 
     clean()
@@ -24,11 +33,7 @@ def download_torrent_from_api(magnet):
         progress = float(torrents[0]['progress'])
         torrents = account.listContents()['torrents']
         
-        if time.time() - start_time > 45 and progress < 5:
-            clean()
-            return {'success': False, 'error_message': 'Torrent is too slow to download.'}
-
-        if time.time() - start_time > 300 and progress < 95:
+        if not progress_check(start_time, progress):
             clean()
             return {'success': False, 'error_message': 'Torrent is too slow to download.'}
         
