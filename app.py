@@ -39,6 +39,8 @@ def download_torrent(magnet):
         if folders:
             for folder in folders:
                 files.extend(account.listContents(folderId=folder['id'])['files'])
+
+# add functionality to view all files, in all folders, with folder names somehow .
     else:
         files = account.listContents()['files']
     
