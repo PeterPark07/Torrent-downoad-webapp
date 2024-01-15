@@ -9,9 +9,9 @@ def download_torrent_from_api(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
-    print(add)
+
     if add['result'] == True:
-        response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
+        title = add['title']
     else:
         return {'success': False, 'error_message': 'invalid link.'}
 
@@ -40,7 +40,7 @@ def download_torrent_from_api(magnet):
         links.append(account.fetchFile(fileId=file['folder_file_id'])['url'])
         sizes.append(str((file['size'])//(1024*1024) +1) + ' MB')
 
-    return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes}
+    return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes, 'torrent_name' : title}
 
 
     # {'success': False, 'error_message': 'Torrent download failed.'}
@@ -56,16 +56,17 @@ def index():
             download_links = download_response.get('download_links', [])
             file_names = download_response.get('file_names', [])
             file_sizes = download_response.get('file_sizes', [])
+            torrent_name = download_response.get('torrent_name', '')
 
             # Zip the lists before passing them to the template
             file_data = zip(download_links, file_names, file_sizes)
             
-            return render_template('index.html', file_data=file_data)
+            return render_template('index.html', file_data=file_data, torrent_name=torrent_name)
         else:
             error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
             return render_template('index.html', error_message=error_message)
 
-    return render_template('index.html', download_links=None)
+    return render_template('index.html', file_data=None, torrent_name=None)
 
 @app.route('/reset', methods=['GET'])
 def reset():
