@@ -83,7 +83,7 @@
     </form>
 
     {% if file_data %}
-        <h2>Download Links:</h2>
+        <h2>Download Links for {{ torrent_name }}:</h2>
         <ul>
             {% for link, name, size in file_data %}
                 <li>
