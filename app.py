@@ -12,8 +12,8 @@ def download_torrent_from_api(magnet):
     print(add)
 
     if add['result'] != True:
-        error_message = add['error'] if 'error' in add else ''
-        return {'success': False, 'error_message': add['result'] + ' - ' + error_message}
+        error_message = ' - ' + add['error'] if 'error' in add else ''
+        return {'success': False, 'error_message': add['result'] + error_message}
 
     torrents = account.listContents()['torrents']
     title = torrents[0]['name']
@@ -23,7 +23,8 @@ def download_torrent_from_api(magnet):
 
     while torrents:
         time.sleep(3)
-        progress = torrents[0]['progress']
+        progress = float(torrents[0]['progress'])
+        print(progress)
         torrents = account.listContents()['torrents']
         
         if time.time() - start_time > 30 and progress < 5:
