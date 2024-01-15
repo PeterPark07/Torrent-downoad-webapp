@@ -21,7 +21,8 @@ def download_torrent_from_api(magnet):
         torrents = account.listContents()['torrents']
     folders = account.listContents()['folders']
     print(account.listContents())
-
+    
+    
     if folders:
         folder_id = folders[0]['id']
         files = account.listContents(folderId=folder_id)['files']
@@ -65,6 +66,11 @@ def index():
             return render_template('index.html', error_message=error_message)
 
     return render_template('index.html', download_links=None)
+
+@app.route('/reset', methods=['GET'])
+def reset():
+    clean()
+    return 'OK', 200
 
 if __name__ == '__main__':
     app.run(debug=True)
