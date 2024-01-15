@@ -9,9 +9,11 @@ def download_torrent_from_api(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
+    print(add)
 
-    if not add['result']:
-        return {'success': False, 'error_message': 'invalid link.'}
+    if add['result'] != True:
+        error_message = add['error'] if 'error' in add else ''
+        return {'success': False, 'error_message': add['result'] + ' - ' + error_message}
 
     torrents = account.listContents()['torrents']
     title = torrents[0]['name']
