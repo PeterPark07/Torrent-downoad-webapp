@@ -13,19 +13,17 @@ def download_torrent_from_api(magnet):
         response = f"Downloading Torrent ({add['user_torrent_id']})\n\n{add['title']}\n\nTorrent hash: {add['torrent_hash']}"
     else:
         return {'success': False, 'error_message': 'invalid link.'}
+
     torrents = account.listContents()['torrents']
-    print(torrents)
     while torrents:
         time.sleep(3)
         torrents = account.listContents()['torrents']
     folders = account.listContents()['folders']
-    print(folders)
     print(account.listContents())
 
     if folders:
         for folder in folders:
             folder_id = folder['id']
-            print(folder_id)
     files = account.listContents(folderId=folder_id)['files']
     names = []
     links =[]
@@ -33,7 +31,7 @@ def download_torrent_from_api(magnet):
     for file in files:
         names.append(file['name'])
         links.append(account.fetchFile(fileId=file['folder_file_id'])['url'])
-        sizes.append(str((file['size'])//(1024*1024)) + ' MB')
+        sizes.append(str((file['size'])//(1024*1024) +1) + ' MB')
 
     return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes}
 
