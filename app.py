@@ -6,11 +6,17 @@ app = Flask(__name__)
 
 def download_torrent_from_api(magnet):
 
-    folders = account.listContents()['folders']
-    if folders:
-        for folder in folders:
-            folder_id = folder['id']
-            clean = account.deleteFolder(folderId=folder_id)
+    storage = account.listContents()
+
+    for item_type in ['folders', 'files', 'torrents']:
+        for item in storage.get(item_type, []):
+            if item_type == 'folders':
+                account.deleteFolder(item['id'])
+            elif item_type == 'files':
+                account.deleteFile(item['id'])
+            else:
+                account.deleteTorrent(item['id'])
+
 
     add = account.addTorrent(magnetLink=magnet)
     if add['result'] == True:
