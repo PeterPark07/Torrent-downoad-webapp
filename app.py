@@ -23,10 +23,10 @@ def download_torrent_from_api(magnet):
     print(account.listContents())
 
     if folders:
-        for folder in folders:
-            folder_id = folder['id']
-    if folder_id:
+        folder_id = folders[0]['id']
         files = account.listContents(folderId=folder_id)['files']
+        if account.listContents(folderId=folder_id)['folders']:
+            print(account.listContents(folderId=folder_id))
     else:
         files = account.listContents()['files']
     names = []
