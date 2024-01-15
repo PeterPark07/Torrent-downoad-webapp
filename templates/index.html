@@ -71,6 +71,13 @@
             color: red;
             margin-top: 10px;
         }
+
+        #max-size-info {
+            font-size: 14px;
+            color: #777;
+            margin-top: 5px;
+            filter: blur(2px); /* Add blur effect */
+        }
     </style>
 </head>
 <body>
@@ -81,6 +88,8 @@
         <input type="text" id="magnet_link" name="magnet_link" required>
         <button type="submit">Download</button>
     </form>
+
+    <p id="max-size-info">Note: Maximum torrent size is 4GB</p>
 
     {% if file_data %}
         <h2>Download Links for {{ torrent_name }}:</h2>
