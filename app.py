@@ -10,12 +10,11 @@ def download_torrent_from_api(magnet):
 
     add = account.addTorrent(magnetLink=magnet)
 
-    if add['result'] == True:
-        title = add['title']
-    else:
+    if not add['result']:
         return {'success': False, 'error_message': 'invalid link.'}
 
     torrents = account.listContents()['torrents']
+    title = torrents[0]['name']
     print(torrents)
     while torrents:
         time.sleep(3)
@@ -33,13 +32,10 @@ def download_torrent_from_api(magnet):
                 files.extend(account.listContents(folderId=folder['id'])['files'])
     else:
         files = account.listContents()['files']
-    names = []
-    links =[]
-    sizes =[]
-    for file in files:
-        names.append(file['name'])
-        links.append(account.fetchFile(fileId=file['folder_file_id'])['url'])
-        sizes.append(str((file['size'])//(1024*1024) +1) + ' MB')
+    
+    names = [file['name'] for file in files]
+    links = [account.fetchFile(fileId=file['folder_file_id'])['url'] for file in files]
+    sizes = [str((file['size'])//(1024*1024) + 1) + ' MB' for file in files]
 
     return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes, 'torrent_name' : title}
 
@@ -57,7 +53,7 @@ def index():
             download_links = download_response.get('download_links', [])
             file_names = download_response.get('file_names', [])
             file_sizes = download_response.get('file_sizes', [])
-            torrent_name = download_response.get('torrent_name', '')
+            torrent_name = download_response.get('torrent_name', 'Torrent')
 
             # Zip the lists before passing them to the template
             file_data = zip(download_links, file_names, file_sizes)
