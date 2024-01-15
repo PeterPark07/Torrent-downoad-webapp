@@ -31,8 +31,6 @@ def download_torrent_from_api(magnet):
             return {'success': False, 'error_message': 'Torrent is too slow to download.'}
         
     folders = account.listContents()['folders']
-    print(account.listContents())
-    
     
     if folders:
         folder_id = folders[0]['id']
