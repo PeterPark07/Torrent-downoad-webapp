@@ -4,17 +4,8 @@ import time
 
 app = Flask(__name__)
 
-def progress_check(start_time, progress):
-    if time.time() - start_time > 45 and progress < 5:
-        return False
-    elif time.time() - start_time > 300 and progress < 95:
-        return False
-    else:
-        return True
 
-
-def download_torrent_from_api(magnet):
-
+def download_torrent(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
@@ -56,35 +47,41 @@ def download_torrent_from_api(magnet):
     return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes, 'torrent_name' : title}
 
 
-    # {'success': False, 'error_message': 'Torrent download failed.'}
-    pass
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         magnet_link = request.form['magnet_link']
-        download_response = download_torrent_from_api(magnet_link)
+        download_response = download_torrent(magnet_link)
 
-        if download_response and download_response.get('success'):
-            download_links = download_response.get('download_links', [])
-            file_names = download_response.get('file_names', [])
-            file_sizes = download_response.get('file_sizes', [])
+        if download_response and download_response['success']:
+
+            file_data = zip(download_response['download_links'], download_response['file_names'], download_response['file_sizes'])
             torrent_name = download_response.get('torrent_name', 'Torrent')
 
-            # Zip the lists before passing them to the template
-            file_data = zip(download_links, file_names, file_sizes)
-            
             return render_template('index.html', file_data=file_data, torrent_name=torrent_name)
-        else:
-            error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
-            return render_template('index.html', error_message=error_message)
+        
+        error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
+        return render_template('index.html', error_message=error_message)
 
     return render_template('index.html', file_data=None, torrent_name=None)
+
 
 @app.route('/reset', methods=['GET'])
 def reset():
     clean()
     return 'OK', 200
 
+
+def progress_check(start_time, progress):
+    if time.time() - start_time > 45 and progress < 5:
+        return False
+    elif time.time() - start_time > 300 and progress < 95:
+        return False
+    else:
+        return True
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
