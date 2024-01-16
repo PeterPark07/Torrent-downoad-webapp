@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 def log_request(request, magnet_link, torrent, success):
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    timestamp = timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
     user_agent = request.headers.get('User-Agent', 'N/A')
 
     log.insert_one({
