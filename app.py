@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 from helper.account import account, clean
 from helper.database import log
 import time 
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -82,7 +83,7 @@ def reset():
 
 def log_request(request, magnet_link):
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    log.insert_one({'ip': ip, 'magnet_link': magnet_link, 'timestamp': time.time()})
+    log.insert_one({'ip': ip, 'magnet_link': magnet_link, 'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
     
 
 def progress_check(start_time, progress):
