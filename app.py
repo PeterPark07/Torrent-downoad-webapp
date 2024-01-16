@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from helper.account import account, clean
+from helper.database import log
 import time 
 
 app = Flask(__name__)
