@@ -6,17 +6,18 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-def log_request(request, magnet_link, torrent):
+def log_request(request, magnet_link, torrent, success):
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     user_agent = request.headers.get('User-Agent', 'N/A')
 
     log.insert_one({
         'timestamp': timestamp,
+        'success': success,
         'ip': ip,
         'user_agent': user_agent,
         'magnet_link': magnet_link,
-        'torrent': torrent
+        'status': torrent
     })
 
 def download_torrent(magnet):
@@ -78,12 +79,11 @@ def index():
             file_data = zip(download_response['download_links'], download_response['file_names'], download_response['file_sizes'])
             torrent_name = download_response.get('torrent_name', 'Torrent')
 
-            log_request(request, magnet_link, torrent_name)
+            log_request(request, magnet_link, torrent_name, 1)
             return render_template('index.html', file_data=file_data, torrent_name=torrent_name)
-            
-        log_request(request, magnet_link, 'failed')
         
         error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
+        log_request(request, magnet_link, error_message, 0)
         return render_template('index.html', error_message=error_message)
 
     return render_template('index.html', file_data=None, torrent_name=None)
