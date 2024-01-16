@@ -6,6 +6,27 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+def log_request(request, magnet_link):
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    user_agent = request.headers.get('User-Agent', 'N/A')
+    device_type = request.user_agent.platform if request.user_agent else 'N/A'
+    connection_type = request.headers.get('Connection', 'N/A')
+    cores = request.headers.get('Cores', 'N/A')
+    device_memory = request.headers.get('Device-Memory', 'N/A')
+
+    log.insert_one({
+        'timestamp': timestamp,
+        'ip': ip,
+        'magnet_link': magnet_link,
+        'device': {
+            'user_agent': user_agent,
+            'type': device_type,
+            'cores': cores,
+            'memory': device_memory
+        },
+        'connection_type': connection_type,
+    })
 
 def download_torrent(magnet):
     clean()
@@ -80,11 +101,6 @@ def index():
 def reset():
     clean()
     return 'OK', 200
-
-def log_request(request, magnet_link):
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    log.insert_one({'ip': ip, 'magnet_link': magnet_link, 'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
-    
 
 def progress_check(start_time, progress):
     if time.time() - start_time > 45 and progress < 5:
