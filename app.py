@@ -17,11 +17,6 @@ def download_torrent(magnet):
         error_message = ' - ' + add['error'] if 'error' in add else ''
         return {'success': False, 'error_message': add['result'] + error_message}
 
-    # Extract user IP from request headers
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-
-    # Log the request
-    log_request(user_ip, magnet)
     
     torrents = account.listContents()['torrents']
     title = torrents[0]['name']
@@ -64,6 +59,9 @@ def index():
         magnet_link = request.form['magnet_link']
         download_response = download_torrent(magnet_link)
 
+        # Log the request
+        log_request(request, magnet_link)
+
         if download_response and download_response['success']:
 
             file_data = zip(download_response['download_links'], download_response['file_names'], download_response['file_sizes'])
@@ -82,7 +80,8 @@ def reset():
     clean()
     return 'OK', 200
 
-def log_request(ip, magnet_link):
+def log_request(request, magnet_link):
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     log.insert_one({'ip': ip, 'magnet_link': magnet_link, 'timestamp': time.time()})
     
 
