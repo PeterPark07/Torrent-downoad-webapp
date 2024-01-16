@@ -73,15 +73,15 @@ def index():
         magnet_link = request.form['magnet_link']
         download_response = download_torrent(magnet_link)
 
-        # Log the request
-        log_request(request, magnet_link, 'invalid')
-
         if download_response and download_response['success']:
 
             file_data = zip(download_response['download_links'], download_response['file_names'], download_response['file_sizes'])
             torrent_name = download_response.get('torrent_name', 'Torrent')
 
+            log_request(request, magnet_link, torrent_name)
             return render_template('index.html', file_data=file_data, torrent_name=torrent_name)
+            
+        log_request(request, magnet_link, 'failed')
         
         error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
         return render_template('index.html', error_message=error_message)
