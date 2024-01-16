@@ -24,7 +24,6 @@ def download_torrent(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
-    print(add)
 
     if add['result'] != True:
         if add['result'] == 'not_enough_space_wishlist_full':
