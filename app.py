@@ -6,32 +6,24 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-def log_request(request, magnet_link):
+def log_request(request, magnet_link, torrent):
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     user_agent = request.headers.get('User-Agent', 'N/A')
-    device_type = request.user_agent.platform if request.user_agent else 'N/A'
-    connection_type = request.headers.get('Connection', 'N/A')
-    cores = request.headers.get('Cores', 'N/A')
-    device_memory = request.headers.get('Device-Memory', 'N/A')
 
     log.insert_one({
         'timestamp': timestamp,
         'ip': ip,
+        'user_agent': user_agent,
         'magnet_link': magnet_link,
-        'device': {
-            'user_agent': user_agent,
-            'type': device_type,
-            'cores': cores,
-            'memory': device_memory
-        },
-        'connection_type': connection_type,
+        'torrent': torrent
     })
 
 def download_torrent(magnet):
     clean()
 
     add = account.addTorrent(magnetLink=magnet)
+    print(add)
 
     if add['result'] != True:
         if add['result'] == 'not_enough_space_wishlist_full':
@@ -82,7 +74,7 @@ def index():
         download_response = download_torrent(magnet_link)
 
         # Log the request
-        log_request(request, magnet_link)
+        log_request(request, magnet_link, 'invalid')
 
         if download_response and download_response['success']:
 
