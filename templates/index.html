@@ -43,6 +43,12 @@
             margin-bottom: 15px;
         }
 
+        #charCount {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
         button {
             padding: 15px 30px;
             font-size: 18px;
@@ -79,6 +85,7 @@
     <form method="POST" action="/">
         <label for="magnet_link">Enter Torrent Magnet Link:</label>
         <input type="text" id="magnet_link" name="magnet_link" required>
+        <p id="charCount">Character Count: 0</p>
         <button type="submit">Download</button>
     </form>
 
@@ -96,6 +103,13 @@
 
     {% if error_message %}
         <p class="error-message">{{ error_message }}</p>
-    {% endif %}
+    {% endif }
+
+    <script>
+        document.getElementById('magnet_link').addEventListener('input', function() {
+            document.getElementById('charCount').innerText = 'Character Count: ' + this.value.length;
+        });
+    </script>
+
 </body>
 </html>
