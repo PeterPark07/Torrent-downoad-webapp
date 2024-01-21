@@ -1,131 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torrent Download Site</title>
+from flask import Flask, render_template, request
+from helper.account import account, clean
+from helper.database import log
+import time 
+import pytz
+from datetime import datetime
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+app = Flask(__name__)
 
-        h1 {
-            color: #007BFF;
-        }
+def log_request(request, magnet_link, torrent, success):
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    timestamp = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
+    user_agent = request.headers.get('User-Agent', 'N/A')
 
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
+    log.insert_one({
+        'timestamp': timestamp,
+        'success': success,
+        'ip': ip,
+        'user_agent': user_agent,
+        'magnet_link': magnet_link,
+        'status': torrent
+    })
 
-        label {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
+def download_torrent(magnet):
+    clean()
 
-        input {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 300px;
-            margin-bottom: 15px;
-        }
+    add = account.addTorrent(magnetLink=magnet)
 
-        #charCount {
-            font-size: 12px;
-            color: #555;
-            position: absolute;
-            margin-top: 32px;
-            margin-left: 10px;
-        }
+    if add['result'] != True:
+        if add['result'] == 'not_enough_space_wishlist_full':
+            return {'success': False, 'error_message': 'Maximum torrent size is 4GB.'}
+        error_message = ' - ' + add['error'] if 'error' in add else ''
+        return {'success': False, 'error_message': add['result'] + error_message}
 
-        #pleaseWait {
-            display: none;
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
+    
+    torrents = account.listContents()['torrents']
+    title = torrents[0]['name']
 
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    start_time = time.time()
 
-        button:hover {
-            background-color: #218838;
-        }
+    while torrents:
+        time.sleep(3)
+        progress = float(torrents[0]['progress'])
+        torrents = account.listContents()['torrents']
+        
+        if not progress_check(start_time, progress):
+            clean()
+            return {'success': False, 'error_message': 'Torrent is too slow to download.'}
+        
+    folders = account.listContents()['folders']
+    
+    if folders:
+        folder_id = folders[0]['id']
+        files = account.listContents(folderId=folder_id)['files']
+        folders = account.listContents(folderId=folder_id)['folders']
+        if folders:
+            for folder in folders:
+                files.extend(account.listContents(folderId=folder['id'])['files'])
 
-        ul {
-            list-style: none;
-            padding: 0;
-        }
+# add functionality to view all files, in all folders, with folder names somehow .
+    else:
+        files = account.listContents()['files']
+    
+    names = [file['name'] for file in files]
+    links = [account.fetchFile(fileId=file['folder_file_id'])['url'] for file in files]
+    sizes = [str((file['size'])//(1024*1024) + 1) + ' MB' for file in files]
 
-        li {
-            margin-bottom: 10px;
-        }
+    return {'success': True, 'download_links': links, 'file_names' : names, 'file_sizes' : sizes, 'torrent_name' : title}
 
-        p.error-message {
-            color: red;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Torrent Download Site</h1>
 
-    <form method="POST" action="/">
-        <label for="magnet_link">Enter Torrent Magnet Link:</label>
-        <div style="position: relative;">
-            <input type="text" id="magnet_link" name="magnet_link" required>
-            <p id="charCount">Character Count: 0</p>
-            <p id="pleaseWait">Please wait...</p>
-        </div>
-        <button type="submit" onclick="showPleaseWait()">Download</button>
-    </form>
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        magnet_link = request.form['magnet_link']
+        if not 'magnet' in magnet_link :
+            error_message = 'Invalid magnet link provided.'
+            log_request(request, magnet_link, error_message, 0)
+            return render_template('index.html', error_message=error_message)
 
-    {% if file_data %}
-        <h2>Download Links for {{ torrent_name }}:</h2>
-        <ul>
-            {% for link, name, size in file_data %}
-                <li>
-                    <a href="{{ link }}" target="_blank">{{ name }}</a>
-                    (Size: {{ size }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+            
+        download_response = download_torrent(magnet_link)
 
-    {% if error_message %}
-        <p class="error-message">{{ error_message }}</p>
-    {% endif }
+        if download_response and download_response['success']:
 
-    <script>
-        document.getElementById('magnet_link').addEventListener('input', function() {
-            document.getElementById('charCount').innerText = 'Character Count: ' + this.value.length;
-        });
+            file_data = zip(download_response['download_links'], download_response['file_names'], download_response['file_sizes'])
+            torrent_name = download_response.get('torrent_name', 'Torrent')
 
-        function showPleaseWait() {
-            document.getElementById('pleaseWait').style.display = 'block';
-        }
-    </script>
+            log_request(request, magnet_link, torrent_name, 1)
+            return render_template('index.html', file_data=file_data, torrent_name=torrent_name)
+        
+        error_message = download_response.get('error_message', 'Torrent download failed.') if download_response else 'Torrent download failed.'
+        log_request(request, magnet_link, error_message, 0)
+        return render_template('index.html', error_message=error_message)
 
-</body>
-</html>
+    return render_template('index.html', file_data=None, torrent_name=None)
+
+
+@app.route('/reset', methods=['GET'])
+def reset():
+    clean()
+    return 'OK', 200
+
+def progress_check(start_time, progress):
+    if time.time() - start_time > 45 and progress < 5:
+        return False
+    elif time.time() - start_time > 300 and progress < 95:
+        return False
+    else:
+        return True
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
