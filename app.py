@@ -72,6 +72,12 @@ def download_torrent(magnet):
 def index():
     if request.method == 'POST':
         magnet_link = request.form['magnet_link']
+        if not 'magnet' in magnet_link :
+            error_message = 'Invalid magnet link provided.'
+            log_request(request, magnet_link, error_message, 0)
+            return render_template('index.html', error_message=error_message)
+
+            
         download_response = download_torrent(magnet_link)
 
         if download_response and download_response['success']:
