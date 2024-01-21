@@ -91,11 +91,9 @@
 
     <form method="POST" action="/">
         <label for="magnet_link">Enter Torrent Magnet Link:</label>
-        <div style="position: relative;">
-            <input type="text" id="magnet_link" name="magnet_link" required>
-            <p id="charCount">Character Count: 0</p>
-            <p id="pleaseWait">Please wait...</p>
-        </div>
+        <input type="text" id="magnet_link" name="magnet_link" required>
+        <p id="charCount">Character Count: 0</p>
+        <p id="pleaseWait">Please wait...</p>
         <button type="submit" onclick="showPleaseWait()">Download</button>
     </form>
 
